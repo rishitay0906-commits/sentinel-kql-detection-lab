@@ -1,0 +1,15 @@
+// Detection: Suspicious inbox rule creation
+// MITRE ATT&CK: T1114.003 - Email Collection: Email Forwarding Rule
+// Data source: OfficeActivity_CL (Sentinel Training Lab custom table)
+// Logic: flags New-InboxRule operations, surfacing the actor IP, the
+//        affected mailbox, and the rule parameters for triage. Inbox
+//        rules that hide, delete, or forward mail are a common post
+//        compromise persistence and collection technique.
+// False positives: legitimate user created rules for filing or vacation
+//        handling. Triage the Parameters for delete, forward, or stop
+//        processing behaviour and correlate the actor IP with sign-in data.
+// Severity: High when the actor IP matches known malicious activity
+OfficeActivity_CL
+| where Operation_s == "New-InboxRule"
+| project TimeGenerated, AffectedUser = UserId_s, ActorIP = ClientIP_s, RuleParameters = Parameters_s
+| sort by TimeGenerated desc
