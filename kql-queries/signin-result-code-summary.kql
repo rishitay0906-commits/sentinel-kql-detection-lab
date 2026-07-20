@@ -1,0 +1,8 @@
+// Query: Sign-in result code summary
+// Purpose: triage helper, lists every sign-in outcome code and its count
+// Data source: SigninLogs_CL (Sentinel Training Lab custom table)
+// Reference: 0 = success, 50057 = account disabled,
+//            16000 = interrupted (CA/MFA), 50058 = session info missing
+SigninLogs_CL
+| summarize count() by ResultType
+| sort by count_ desc
