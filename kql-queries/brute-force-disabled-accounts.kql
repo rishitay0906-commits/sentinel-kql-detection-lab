@@ -1,0 +1,19 @@
+// Detection: Brute force against disabled accounts
+// MITRE ATT&CK: T1110 - Brute Force (Credential Access)
+// Data source: SigninLogs_CL (Sentinel Training Lab custom table)
+// Logic: 3 or more failed sign-ins to disabled accounts (ResultType 50057)
+//        from a single IP within a 1-hour window
+// False positives: stale service credentials, users unaware account is disabled
+// Severity: Medium
+SigninLogs_CL
+| where ResultType == "50057"
+| summarize
+    FailedAttempts = count(),
+    TargetedAccounts = dcount(UserPrincipalName_s),
+    Accounts = make_set(UserPrincipalName_s, 20),
+    Locations = make_set(Location_s, 10),
+    FirstAttempt = min(TimeGenerated),
+    LastAttempt = max(TimeGenerated)
+    by IPAddress, bin(TimeGenerated, 1h)
+| where FailedAttempts >= 3
+| sort by FailedAttempts desc
