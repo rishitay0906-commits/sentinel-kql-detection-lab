@@ -1,0 +1,1 @@
+# sentinel-kql-detection-lab
